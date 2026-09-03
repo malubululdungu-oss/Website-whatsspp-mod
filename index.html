@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WhatsApp Web Simulator - 3 Unique Numbers System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0c1317;
+            color: #e9edef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: #111b21;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            border-left: 1px solid #222d34;
+            border-right: 1px solid #222d34;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            background: #202c33;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            z-index: 5;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .header .title {
+            color: #00a884;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 18px;
+            color: #aebac1;
+            font-size: 19px;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .main-dropdown {
+            position: absolute;
+            top: 52px;
+            right: 12px;
+            background: #233138;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            width: 230px;
+            z-index: 30;
+            border: 1px solid #111b21;
+            overflow: hidden;
+        }
+
+        .main-dropdown.active {
+            display: flex;
+        }
+
+        .tabs {
+            display: flex;
+            background: #202c33;
+            border-bottom: 1px solid #222d34;
+            height: 42px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 11px 0;
+            color: #8696a0;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .tab.active {
+            color: #00a884;
+            border-bottom: 3px solid #00a884;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .item-list {
+            display: flex;
+            padding: 12px 16px;
+            gap: 15px;
+            align-items: center;
+            border-bottom: 1px solid #1f2c34;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .item-list:hover {
+            background-color: #202c33;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .item-name {
+            font-size: 15px;
+            color: #e9edef;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-time {
+            font-size: 12px;
+            color: #8696a0;
+        }
+
+        .item-preview {
+            font-size: 13px;
+            color: #8696a0;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .code-badge {
+            background: #00a884;
+            color: #111b21;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #8696a0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .empty-state button {
+            margin-top: 18px;
+            background: #00a884;
+            border: none;
+            padding: 12px 24px;
+            color: #111b21;
+            font-weight: bold;
+            border-radius: 24px;
+            cursor: pointer;
+        }
+
+        .fab {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: #00a884;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #111b21;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 4;
+        }
+
+        .conversation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0b141a;
+            display: none; /* Perbaikan agar tidak menutupi layar saat awal */
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
+            z-index: 10;
+        }
+
+        .conversation.active {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .conv-header {
+            background: #202c33;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 60px;
+            z-index: 12;
+            position: relative;
+        }
+
+        .back-btn {
+            font-size: 22px;
+            color: #aebac1;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .conv-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #e9edef;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sender-toggle {
+            background: #111b21;
+            padding: 6px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00a884;
+            border: 1px solid #00a884;
+            cursor: pointer;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .sender-toggle.other {
+            color: #e9edef;
+            border-color: #8696a0;
+            background: #2a3942;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 52px;
+            right: 12px;
+            background: #233138;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            width: 200px;
+            z-index: 30;
+            border: 1px solid #111b21;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #e9edef;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: #182229;
+        }
+
+        .dropdown-item.danger {
+            color: #f15c6d;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 12px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-image: radial-gradient(#202c33 1px, transparent 0);
+            background-size: 16px 16px;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 14.2px;
+            line-height: 1.35;
+            position: relative;
+            word-break: break-word;
+            user-select: text;
+        }
+
+        .bubble.sent {
+            background: #005c4b;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+        }
+
+        .bubble.received {
+            background: #202c33;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+        }
+
+        .sender-tag {
+            font-size: 10px;
+            font-weight: bold;
+            color: #00a884;
+            margin-bottom: 3px;
+            display: block;
+        }
+
+        .msg-meta {
+            font-size: 10px;
+            color: #8696a0;
+            float: right;
+            margin-left: 10px;
+            margin-top: 4px;
+        }
+
+        .input-bar {
+            background: #202c33;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: #2a3942;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 20px;
+            color: #fff;
+            outline: none;
+            font-size: 15px;
+            user-select: text;
+        }
+
+        .send-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #00a884;
+            border: none;
+            color: #111b21;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal Custom Style */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #233138;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 1px solid #111b21;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #e9edef;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: #8696a0;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: #111b21;
+            border: 1px solid #00a884;
+            padding: 10px;
+            border-radius: 6px;
+            color: #fff;
+            outline: none;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-btn.primary {
+            background: #00a884;
+            color: #111b21;
+        }
+
+        .modal-btn.secondary {
+            background: transparent;
+            color: #8696a0;
+        }
+    </style>
+</head>
+<body onclick="closeAllMenus()">
+
+<div class="app-container">
+    <div class="header">
+        <div class="title">WhatsApp</div>
+        <div class="header-icons">
+            <span onclick="addNewUser(); event.stopPropagation();" title="Registrasi Orang Baru">👤+</span>
+            <span onclick="addChatWith3Codes(); event.stopPropagation();" title="Tambah Chat dengan 3 Kode">💬+</span>
+            <span onclick="toggleMainDropdown(event)" title="Menu Utama">⋮</span>
+        </div>
+
+        <div class="main-dropdown" id="mainDropdown">
+            <div class="dropdown-item" onclick="showAllUserCodes()">🔑 Lihat Semua Kode Unik</div>
+            <div class="dropdown-item" onclick="addNewUser()">👤 Buat Kontak/User Baru</div>
+            <div class="dropdown-item" onclick="addChatWith3Codes()">💬 Mulai Chat (Masuk 3 Kode)</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('chatsTab', this)">Chat</div>
+        <div class="tab" onclick="switchTab('statusTab', this)">Status</div>
+        <div class="tab" onclick="switchTab('callsTab', this)">Panggilan</div>
+    </div>
+
+    <div class="tab-content active" id="chatsTab">
+        <div id="chatList"></div>
+        <div class="fab" onclick="addChatWith3Codes()" title="Tambah Chat Baru">💬</div>
+    </div>
+
+    <div class="tab-content" id="statusTab">
+        <div class="empty-state"><p>Tidak ada status.</p></div>
+    </div>
+
+    <div class="tab-content" id="callsTab">
+        <div class="empty-state"><p>Tidak ada panggilan.</p></div>
+    </div>
+
+    <!-- RUANG CHAT OVERLAY -->
+    <div class="conversation" id="chatRoom">
+        <div class="conv-header">
+            <div class="back-btn" onclick="closeChat()">←</div>
+            <div class="avatar" id="roomAvatar" style="width:38px; height:38px; font-size:16px;">C</div>
+            <div style="flex:1; overflow:hidden;">
+                <div class="conv-title" id="roomName">Nama <span id="roomCodes"></span></div>
+                <div style="font-size:11px; color:#8696a0;">online</div>
+            </div>
+            
+            <button class="sender-toggle" id="senderToggleBtn" onclick="toggleSenderRole()">Pengirim: Saya</button>
+            <div class="menu-btn" style="color:#aebac1; cursor:pointer; padding:6px;" onclick="toggleChatDropdown(event)">⋮</div>
+
+            <div class="dropdown-menu" id="chatDropdown">
+                <div class="dropdown-item" onclick="showCurrentChatCodes()">🔑 Info 3 Kode Unik</div>
+                <div class="dropdown-item danger" onclick="deleteCurrentChat()">🗑️ Hapus Chat</div>
+            </div>
+        </div>
+
+        <div class="messages-area" id="msgArea"></div>
+
+        <div class="input-bar">
+            <input type="text" id="typeInput" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOM MODAL UI -->
+<div class="modal-overlay" id="customModal">
+    <div class="modal-card">
+        <div class="modal-title" id="modalTitle">Judul Modal</div>
+        <div class="modal-body" id="modalBody">Pesan modal.</div>
+        <input type="text" class="modal-input" id="modalInput" style="display:none;" placeholder="Ketik di sini...">
+        <div class="modal-actions">
+            <button class="modal-btn secondary" id="modalCancelBtn" onclick="closeModal()">Batal</button>
+            <button class="modal-btn primary" id="modalConfirmBtn">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let userRegistry = JSON.parse(localStorage.getItem('wa_user_registry_num_v1')) || {};
+    let chatDB = JSON.parse(localStorage.getItem('wa_3code_chat_db_num_v1')) || {};
+    
+    let activeId = null;
+    let currentSenderRole = 'sent';
+
+    function saveData() {
+        localStorage.setItem('wa_user_registry_num_v1', JSON.stringify(userRegistry));
+        localStorage.setItem('wa_3code_chat_db_num_v1', JSON.stringify(chatDB));
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function(m) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[m];
+        });
+    }
+
+    function showModal({ title, body, hasInput = false, placeholder = '', onConfirm = null }) {
+        const modal = document.getElementById('customModal');
+        const mTitle = document.getElementById('modalTitle');
+        const mBody = document.getElementById('modalBody');
+        const mInput = document.getElementById('modalInput');
+        const btnConfirm = document.getElementById('modalConfirmBtn');
+
+        mTitle.innerText = title;
+        mBody.innerText = body;
+        
+        if (hasInput) {
+            mInput.style.display = 'block';
+            mInput.value = '';
+            mInput.placeholder = placeholder;
+            setTimeout(() => mInput.focus(), 100);
+        } else {
+            mInput.style.display = 'none';
+        }
+
+        btnConfirm.onclick = () => {
+            const val = mInput.value;
+            closeModal();
+            if (onConfirm) onConfirm(val);
+        };
+
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('active');
+    }
+
+    function generate3UniqueCodes() {
+        let allUsedCodes = [];
+        Object.keys(userRegistry).forEach(userId => {
+            allUsedCodes = allUsedCodes.concat(userRegistry[userId].codes);
+        });
+
+        let newCodes = [];
+        while (newCodes.length < 3) {
+            let randomNum = Math.floor(100 + Math.random() * 900).toString();
+            if (!allUsedCodes.includes(randomNum) && !newCodes.includes(randomNum)) {
+                newCodes.push(randomNum);
+            }
+        }
+        return newCodes;
+    }
+
+    function addNewUser() {
+        closeAllMenus();
+        showModal({
+            title: "Buat Kontak Baru",
+            body: "Masukkan Nama Kontak/Orang Baru:",
+            hasInput: true,
+            placeholder: "Contoh: Budi Prasetyo",
+            onConfirm: (name) => {
+                if (!name || name.trim() === '') return;
+
+                const generatedCodes = generate3UniqueCodes();
+                const userId = 'user_' + Date.now();
+                const colors = ['#e67e22', '#9b59b6', '#1abc9c', '#f1c40f', '#e74c3c', '#3498db', '#e91e63'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                userRegistry[userId] = {
+                    id: userId,
+                    name: name.trim(),
+                    codes: generatedCodes,
+                    color: randomColor
+                };
+
+                saveData();
+                showModal({
+                    title: "User Berhasil Dibuat",
+                    body: `Nama: ${name}\n\n3 Kode Unik System:\n[ Kode 1: ${generatedCodes[0]} ]\n[ Kode 2: ${generatedCodes[1]} ]\n[ Kode 3: ${generatedCodes[2]} ]`
+                });
+            }
+        });
+    }
+
+    function addChatWith3Codes() {
+        closeAllMenus();
+        const registryKeys = Object.keys(userRegistry);
+
+        if (registryKeys.length === 0) {
+            showModal({
+                title: "Perhatian",
+                body: "Belum ada kontak terdaftar! Silakan klik tombol '👤+' untuk membuat kontak baru dulu."
+            });
+            return;
+        }
+
+        showModal({
+            title: "Verifikasi Akses (1/3)",
+            body: "Masukkan Kode Unik ke-1:",
+            hasInput: true,
+            placeholder: "3 Digit angka",
+            onConfirm: (c1) => {
+                if (!c1) return;
+                showModal({
+                    title: "Verifikasi Akses (2/3)",
+                    body: "Masukkan Kode Unik ke-2:",
+                    hasInput: true,
+                    placeholder: "3 Digit angka",
+                    onConfirm: (c2) => {
+                        if (!c2) return;
+                        showModal({
+                            title: "Verifikasi Akses (3/3)",
+                            body: "Masukkan Kode Unik ke-3:",
+                            hasInput: true,
+                            placeholder: "3 Digit angka",
+                            onConfirm: (c3) => {
+                                if (!c3) return;
+                                verifyAndOpenChat(c1.trim(), c2.trim(), c3.trim());
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function verifyAndOpenChat(c1, c2, c3) {
+        let foundUser = null;
+
+        Object.keys(userRegistry).forEach(id => {
+            const u = userRegistry[id];
+            if (u.codes[0] === c1 && u.codes[1] === c2 && u.codes[2] === c3) {
+                foundUser = u;
+            }
+        });
+
+        if (foundUser) {
+            if (!chatDB[foundUser.id]) {
+                chatDB[foundUser.id] = {
+                    id: foundUser.id,
+                    name: foundUser.name,
+                    codes: foundUser.codes,
+                    color: foundUser.color,
+                    messages: []
+                };
+            }
+            saveData();
+            renderChatList();
+            openChat(foundUser.id);
+        } else {
+            showModal({
+                title: "Akses Ditolak",
+                body: "❌ KODE SALAH!\n3 Kode Unik tidak cocok atau urutannya tidak sesuai."
+            });
+        }
+    }
+
+    function renderChatList() {
+        const chatList = document.getElementById('chatList');
+        chatList.innerHTML = '';
+        const keys = Object.keys(chatDB);
+
+        if (keys.length === 0) {
+            chatList.innerHTML = `
+                <div class="empty-state">
+                    <p>Belum ada obrolan aktif.</p>
+                    <button onclick="addChatWith3Codes()">+ Masukkan 3 Kode Unik untuk Chat</button>
+                </div>
+            `;
+            return;
+        }
+
+        keys.forEach(id => {
+            const chat = chatDB[id];
+            const lastMsg = chat.messages[chat.messages.length - 1] || { text: 'Belum ada pesan', time: '' };
+            const codeBadges = chat.codes.map(c => `<span class="code-badge">${escapeHtml(c)}</span>`).join('');
+
+            const item = document.createElement('div');
+            item.className = 'item-list';
+            item.onclick = () => openChat(id);
+            item.innerHTML = `
+                <div class="avatar" style="background:${chat.color};">${escapeHtml(chat.name.charAt(0).toUpperCase())}</div>
+                <div class="item-info">
+                    <div class="item-name">
+                        <span>${escapeHtml(chat.name)} ${codeBadges}</span>
+                        <span class="item-time">${escapeHtml(lastMsg.time)}</span>
+                    </div>
+                    <div class="item-preview">
+                        <span>${escapeHtml(lastMsg.text)}</span>
+                    </div>
+                </div>
+            `;
+            chatList.appendChild(item);
+        });
+    }
+
+    function showAllUserCodes() {
+        closeAllMenus();
+        const keys = Object.keys(userRegistry);
+        if (keys.length === 0) {
+            showModal({
+                title: "Info Sistem",
+                body: "Belum ada kontak terdaftar di sistem."
+            });
+            return;
+        }
+
+        let info = "DAFTAR KODE UNIK USER:\n----------------------------------------\n\n";
+        keys.forEach((id, index) => {
+            const u = userRegistry[id];
+            info += `${index + 1}. ${u.name}\n   ➔ Kode 1: ${u.codes[0]} | Kode 2: ${u.codes[1]} | Kode 3: ${u.codes[2]}\n\n`;
+        });
+
+        showModal({
+            title: "Data Registrasi User",
+            body: info
+        });
+    }
+
+    function openChat(id) {
+        activeId = id;
+        const chat = chatDB[id];
+        
+        document.getElementById('roomName').childNodes[0].nodeValue = chat.name + " ";
+        document.getElementById('roomCodes').innerHTML = chat.codes.map(c => `<span class="code-badge">${escapeHtml(c)}</span>`).join('');
+        document.getElementById('roomAvatar').innerText = chat.name.charAt(0).toUpperCase();
+        document.getElementById('roomAvatar').style.background = chat.color;
+        
+        currentSenderRole = 'sent';
+        const btn = document.getElementById('senderToggleBtn');
+        btn.innerText = 'Pengirim: Saya';
+        btn.classList.remove('other');
+
+        closeAllMenus();
+        renderMessages();
+
+        // Penanganan animasi & visibilitas layar chat
+        const room = document.getElementById('chatRoom');
+        room.style.display = 'flex';
+        setTimeout(() => room.classList.add('active'), 10);
+    }
+
+    function closeChat() {
+        const room = document.getElementById('chatRoom');
+        room.classList.remove('active');
+        setTimeout(() => {
+            room.style.display = 'none';
+        }, 250);
+        closeAllMenus();
+        renderChatList();
+    }
+
+    function toggleSenderRole() {
+        const btn = document.getElementById('senderToggleBtn');
+        if (currentSenderRole === 'sent') {
+            currentSenderRole = 'received';
+            btn.innerText = 'Pengirim: ' + chatDB[activeId].name;
+            btn.classList.add('other');
+        } else {
+            currentSenderRole = 'sent';
+            btn.innerText = 'Pengirim: Saya';
+            btn.classList.remove('other');
+        }
+    }
+
+    function renderMessages() {
+        const msgArea = document.getElementById('msgArea');
+        msgArea.innerHTML = '';
+        if (!activeId || !chatDB[activeId]) return;
+
+        const messages = chatDB[activeId].messages;
+        const chat = chatDB[activeId];
+
+        messages.forEach(msg => {
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${msg.type}`;
+            
+            const senderTag = msg.type === 'sent' ? 'Saya' : `${escapeHtml(chat.name)} [${chat.codes.join('-')}]`;
+            bubble.innerHTML = `<span class="sender-tag">${senderTag}</span>${escapeHtml(msg.text)} <div class="msg-meta">${escapeHtml(msg.time)}</div>`;
+            
+            msgArea.appendChild(bubble);
+        });
+        
+        msgArea.scrollTop = msgArea.scrollHeight;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('typeInput');
+        const text = input.value.trim();
+        if (!text || !activeId) return;
+
+        const d = new Date();
+        const timeStr = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+
+        chatDB[activeId].messages.push({
+            text: text,
+            type: currentSenderRole,
+            time: timeStr
+        });
+
+        saveData();
+        renderMessages();
+        input.value = '';
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    function showCurrentChatCodes() {
+        closeAllMenus();
+        if (activeId && chatDB[activeId]) {
+            showModal({
+                title: "Detail Target Chat",
+                body: `Nama: ${chatDB[activeId].name}\n\n3 Kode Unik:\n[ ${chatDB[activeId].codes.join(' ]  [ ')} ]`
+            });
+        }
+    }
+
+    function deleteCurrentChat() {
+        closeAllMenus();
+        showModal({
+            title: "Konfirmasi Hapus",
+            body: "Apakah Anda yakin ingin menghapus obrolan ini dari daftar chat?",
+            onConfirm: () => {
+                delete chatDB[activeId];
+                saveData();
+                closeChat();
+            }
+        });
+    }
+
+    function switchTab(tabId, element) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    function toggleMainDropdown(e) {
+        e.stopPropagation();
+        closeAllMenus();
+        document.getElementById('mainDropdown').classList.toggle('active');
+    }
+
+    function toggleChatDropdown(e) {
+        e.stopPropagation();
+        closeAllMenus();
+        document.getElementById('chatDropdown').classList.toggle('active');
+    }
+
+    function closeAllMenus() {
+        const m1 = document.getElementById('mainDropdown');
+        const m2 = document.getElementById('chatDropdown');
+        if (m1) m1.classList.remove('active');
+        if (m2) m2.classList.remove('active');
+    }
+
+    renderChatList();
+</script>
+
+</body>
+</html>
